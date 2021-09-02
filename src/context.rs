@@ -18,7 +18,7 @@ pub mod execution {
                 },
                 file: Argument {
                     keyword: "--file",
-                    description: "File name",
+                    description: "The output file name",
                     value: None,
                 },
                 size: Argument {
@@ -52,7 +52,7 @@ pub mod execution {
             ];
 
             println!("");
-            println!("¡¡ Welcome to bruteforce !!");
+            println!("Welcome to bruteforce !!");
             println!("");
             println!("Use the following arguments:");
             println!("");
@@ -61,7 +61,7 @@ pub mod execution {
             }
             println!("");
             println!(
-                "Example: # PwdNextGen --length 5 --file /home/bruteforce/dictionary --size 100"
+                "Example: # brute-force --length 5 --file /home/bruteforce/dictionary --size 100"
             );
             println!("");
         }
