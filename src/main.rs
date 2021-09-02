@@ -15,11 +15,11 @@ impl Dictionary {
         (32..=127).map(char::from_u32).flatten().collect()
     }
 
-    fn new(word_lenth: usize) -> Dictionary {
+    fn new(word_lenth: usize, start_with: usize) -> Dictionary {
         Dictionary {
             word_length: word_lenth,
             chars: Dictionary::get_allowed_chars(),
-            word: vec![0],
+            word: (0..start_with+1).map(|_|0).collect(),
             counter: 0,
             owned: 0,
         }
@@ -72,7 +72,8 @@ fn main() {
     let mut app_context = context::execution::AppContext::new();
 
     match app_context.get_parameters(&params) {
-        Ok((file, max_length, size)) => execute(max_length, file, size),
+        Ok((file, max_length, start_with, size)) => 
+            execute(max_length, start_with, file, size),
         Err(e) => {
             println!("{}", e);
             app_context.print_help();
@@ -80,8 +81,8 @@ fn main() {
     };
 }
 
-fn execute(max_length: usize, filename: String, file_size: u32) {
-    let mut dictionary = Dictionary::new(max_length);
+fn execute(max_length: usize, start_with: usize, filename: String, file_size: u32) {
+    let mut dictionary = Dictionary::new(max_length, start_with);
     let has_space =
         |f: &File| -> bool { f.metadata().unwrap().len() < file_size as u64 * 1000000_u64 };
     let has_not_reached_max_length =
