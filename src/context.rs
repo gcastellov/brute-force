@@ -4,9 +4,36 @@ pub mod execution {
 
     pub struct AppContext {
         start_with: Argument<usize>,
+        start_with_char: Argument<char>,
         word_length: Argument<usize>,
         file: Argument<String>,
         size: Argument<u32>,
+        available_chars: Vec<char>,
+    }
+
+    pub struct AppParameters {
+        pub start_with: usize,
+        pub start_with_char: usize,
+        pub word_length: usize,
+        pub file: String,
+        pub size: u32,
+        pub available_chars: Vec<char>,
+    }
+
+    impl AppParameters {
+        fn from(context: &AppContext) -> Self {
+            Self {
+                available_chars: context.available_chars.to_owned(),
+                file: context.file.value.to_owned().unwrap(),
+                size: context.size.value.unwrap(),
+                start_with: context.start_with.value.unwrap(),
+                word_length: context.word_length.value.unwrap(),
+                start_with_char: context.available_chars
+                    .iter()
+                    .position(|c|*c == context.start_with_char.value.unwrap())
+                    .unwrap_or_default()
+            }
+        }
     }
 
     impl AppContext {
@@ -18,6 +45,12 @@ pub mod execution {
                     value: None,
                     default: Some(0)
                 },
+                start_with_char: Argument {
+                    keyword: "--start-with-char",
+                    description: "Starting character when composing words. Can be used in combination of --start-with. Optional.",
+                    value: None,
+                    default: Some(' ')
+                },
                 word_length: Argument {
                     keyword: "--length",
                     description: "Executes until reaching the word length.",
@@ -26,7 +59,7 @@ pub mod execution {
                 },
                 file: Argument {
                     keyword: "--file",
-                    description: "The output file name.",
+                    description: "The output file name path.",
                     value: None,
                     default: None
                 },
@@ -36,24 +69,21 @@ pub mod execution {
                     value: None,
                     default: None
                 },
+                available_chars: (32..=127).map(char::from_u32).flatten().collect()
             }
         }
 
         pub fn get_parameters(
             &mut self,
             params: &Vec<String>,
-        ) -> Result<(String, usize, usize, u32), String> {
+        ) -> Result<AppParameters, String> {
             self.word_length.try_set(&params)?;
             self.file.try_set(&params)?;
             self.size.try_set(&params)?;
             self.start_with.try_set(&params)?;
-
-            Ok((
-                self.file.value.to_owned().unwrap(),
-                self.word_length.value.unwrap(),
-                self.start_with.value.unwrap(),
-                self.size.value.unwrap(),
-            ))
+            self.start_with_char.try_set(&params)?;
+            
+            Ok(AppParameters::from(self))
         }
 
         pub fn print_help(&self) {
@@ -148,6 +178,21 @@ pub mod execution {
                         Some(length) => match length.parse::<u32>() {
                             Ok(l) => Ok(l),
                             _ => Err(format!("Impossible to parse {} to u32", length)),
+                        },
+                        _ => Err(format!("{} value not provided", self.keyword)),
+                    },
+                    _ => Err(format!("{} not provided", self.keyword)),
+                }
+            }
+        }
+
+        impl Parse<char> for Argument<char> {
+            fn parse(&mut self, params: &Vec<String>) -> Result<char, String> {
+                match params.iter().position(|arg| arg.as_str() == self.keyword) {
+                    Some(position) => match params.get(position + 1) {
+                        Some(length) => match length.parse::<char>() {
+                            Ok(l) => Ok(l),
+                            _ => Err(format!("Impossible to parse {} to char", length)),
                         },
                         _ => Err(format!("{} value not provided", self.keyword)),
                     },
