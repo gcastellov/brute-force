@@ -1,3 +1,5 @@
+[![Rust](https://github.com/gcastellov/brute-force/actions/workflows/rust.yml/badge.svg)](https://github.com/gcastellov/brute-force/actions/workflows/rust.yml)
+
 # brute-force
 
 Password dictionary generator made in RUST.
