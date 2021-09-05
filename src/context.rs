@@ -111,6 +111,8 @@ pub mod execution {
     }
 
     mod args {
+        use std::{ops::Deref};
+
 
         pub struct Argument<T> {
             pub keyword: &'static str,
@@ -139,66 +141,61 @@ pub mod execution {
                 self.value = Some(result.clone());
                 Ok(result)
             }
-        }
 
-        impl Parse<usize> for Argument<usize> {
-            fn parse(&mut self, params: &Vec<String>) -> Result<usize, String> {
+            fn parse_core(&mut self, params: &Vec<String>, inner_func: Box<dyn Fn(&String) ->  Result<T, String>>) -> Result<T, String> {
                 match params.iter().position(|arg| arg.as_str() == self.keyword) {
                     Some(position) => match params.get(position + 1) {
-                        Some(length) => match length.parse::<usize>() {
-                            Ok(l) => Ok(l),
-                            _ => Err(format!("Impossible to parse {} to usize", length)),
-                        },
+                        Some(length) => inner_func.deref()(length),
                         _ => Err(format!("{} value not provided", self.keyword)),
                     },
                     _ => Err(format!("{} not provided", self.keyword)),
                 }
+            }
+        }
+
+        impl Parse<usize> for Argument<usize> {
+            fn parse(&mut self, params: &Vec<String>) -> Result<usize, String> {               
+                let inner: Box<dyn Fn(&String) ->  Result<usize, String>> = Box::new(|value|match value.parse::<usize>() {
+                    Ok(l) => Ok(l),
+                    _ => Err(format!("Impossible to parse {} to usize", value)),
+                });
+
+                self.parse_core(params, inner)
             }
         }
 
         impl Parse<String> for Argument<String> {
             fn parse(&mut self, params: &Vec<String>) -> Result<String, String> {
-                match params.iter().position(|arg| arg.as_str() == self.keyword) {
-                    Some(position) => match params.get(position + 1) {
-                        Some(filename) => match std::fs::File::create(filename) {
-                            Ok(_) => Ok(filename.to_owned()),
-                            _ => Err(format!("Impossible to create file {}", filename)),
-                        },
-                        _ => Err(format!("{} value not provided", self.keyword)),
-                    },
-                    _ => Err(format!("{} not provided", self.keyword)),
-                }
+                let inner: Box<dyn Fn(&String) ->  Result<String, String>> = Box::new(|value|match std::fs::File::create(value) {
+                    Ok(_) => Ok(value.to_owned()),
+                    _ => Err(format!("Impossible to create file {}", value)),
+                });
+
+                self.parse_core(params, inner)
             }
         }
 
         impl Parse<u32> for Argument<u32> {
             fn parse(&mut self, params: &Vec<String>) -> Result<u32, String> {
-                match params.iter().position(|arg| arg.as_str() == self.keyword) {
-                    Some(position) => match params.get(position + 1) {
-                        Some(length) => match length.parse::<u32>() {
-                            Ok(l) => Ok(l),
-                            _ => Err(format!("Impossible to parse {} to u32", length)),
-                        },
-                        _ => Err(format!("{} value not provided", self.keyword)),
-                    },
-                    _ => Err(format!("{} not provided", self.keyword)),
-                }
+                let inner: Box<dyn Fn(&String) ->  Result<u32, String>> = Box::new(|value|match value.parse::<u32>() {
+                    Ok(l) => Ok(l),
+                    _ => Err(format!("Impossible to parse {} to u32", value)),
+                });
+
+                self.parse_core(params, inner)
             }
         }
 
         impl Parse<char> for Argument<char> {
             fn parse(&mut self, params: &Vec<String>) -> Result<char, String> {
-                match params.iter().position(|arg| arg.as_str() == self.keyword) {
-                    Some(position) => match params.get(position + 1) {
-                        Some(length) => match length.parse::<char>() {
-                            Ok(l) => Ok(l),
-                            _ => Err(format!("Impossible to parse {} to char", length)),
-                        },
-                        _ => Err(format!("{} value not provided", self.keyword)),
-                    },
-                    _ => Err(format!("{} not provided", self.keyword)),
-                }
+                let inner: Box<dyn Fn(&String) ->  Result<char, String>> = Box::new(|value|match value.parse::<char>() {
+                    Ok(l) => Ok(l),
+                    _ => Err(format!("Impossible to parse {} to char", value)),
+                });
+
+                self.parse_core(params, inner)
             }
         }
+
     }
 }
