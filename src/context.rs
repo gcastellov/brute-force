@@ -8,6 +8,7 @@ pub mod execution {
         word_length: Argument<usize>,
         file: Argument<String>,
         size: Argument<u32>,
+        verbose: Argument<bool>,
         available_chars: Vec<char>,
     }
 
@@ -17,6 +18,7 @@ pub mod execution {
         pub word_length: usize,
         pub file: String,
         pub size: u32,
+        pub verbose: bool,
         pub available_chars: Vec<char>,
     }
 
@@ -28,10 +30,12 @@ pub mod execution {
                 size: context.size.value.unwrap(),
                 start_with: context.start_with.value.unwrap(),
                 word_length: context.word_length.value.unwrap(),
-                start_with_char: context.available_chars
+                verbose: context.verbose.value.unwrap(),
+                start_with_char: context
+                    .available_chars
                     .iter()
-                    .position(|c|*c == context.start_with_char.value.unwrap())
-                    .unwrap_or_default()
+                    .position(|c| *c == context.start_with_char.value.unwrap())
+                    .unwrap_or_default(),
             }
         }
     }
@@ -69,20 +73,24 @@ pub mod execution {
                     value: None,
                     default: None
                 },
+                verbose: Argument {
+                    keyword: "--verbose",
+                    description: "Indicates whether it has to show output info or not. Optional. By default is set to false.",
+                    value: None,
+                    default: Some(false)
+                },
                 available_chars: (32..=127).map(char::from_u32).flatten().collect()
             }
         }
 
-        pub fn get_parameters(
-            &mut self,
-            params: &Vec<String>,
-        ) -> Result<AppParameters, String> {
+        pub fn get_parameters(&mut self, params: &Vec<String>) -> Result<AppParameters, String> {
             self.word_length.try_set(&params)?;
             self.file.try_set(&params)?;
             self.size.try_set(&params)?;
             self.start_with.try_set(&params)?;
             self.start_with_char.try_set(&params)?;
-            
+            self.verbose.try_set(&params)?;
+
             Ok(AppParameters::from(self))
         }
 
@@ -92,6 +100,11 @@ pub mod execution {
                 (self.file.keyword, self.file.description),
                 (self.size.keyword, self.size.description),
                 (self.start_with.keyword, self.start_with.description),
+                (
+                    self.start_with_char.keyword,
+                    self.start_with_char.description,
+                ),
+                (self.verbose.keyword, self.verbose.description),
             ];
 
             println!("");
@@ -100,7 +113,7 @@ pub mod execution {
             println!("Use the following arguments:");
             println!("");
             for (keyword, description) in arguments {
-                println!("\t{: <15}{}", keyword, description);
+                println!("\t{: <20}{}", keyword, description);
             }
             println!("");
             println!(
@@ -111,14 +124,13 @@ pub mod execution {
     }
 
     mod args {
-        use std::{ops::Deref};
-
+        use std::ops::Deref;
 
         pub struct Argument<T> {
             pub keyword: &'static str,
             pub description: &'static str,
             pub value: Option<T>,
-            pub default: Option<T>
+            pub default: Option<T>,
         }
 
         pub trait Parse<T> {
@@ -134,15 +146,19 @@ pub mod execution {
                     Some(val) => {
                         let def: Result<T, String> = Ok(val.clone());
                         self.parse(params).or(def)?
-                    },
-                    _ =>  self.parse(params)?
+                    }
+                    _ => self.parse(params)?,
                 };
-                
+
                 self.value = Some(result.clone());
                 Ok(result)
             }
 
-            fn parse_core(&mut self, params: &Vec<String>, inner_func: Box<dyn Fn(&String) ->  Result<T, String>>) -> Result<T, String> {
+            fn parse_core(
+                &mut self,
+                params: &Vec<String>,
+                inner_func: Box<dyn Fn(&String) -> Result<T, String>>,
+            ) -> Result<T, String> {
                 match params.iter().position(|arg| arg.as_str() == self.keyword) {
                     Some(position) => match params.get(position + 1) {
                         Some(length) => inner_func.deref()(length),
@@ -154,11 +170,12 @@ pub mod execution {
         }
 
         impl Parse<usize> for Argument<usize> {
-            fn parse(&mut self, params: &Vec<String>) -> Result<usize, String> {               
-                let inner: Box<dyn Fn(&String) ->  Result<usize, String>> = Box::new(|value|match value.parse::<usize>() {
-                    Ok(l) => Ok(l),
-                    _ => Err(format!("Impossible to parse {} to usize", value)),
-                });
+            fn parse(&mut self, params: &Vec<String>) -> Result<usize, String> {
+                let inner: Box<dyn Fn(&String) -> Result<usize, String>> =
+                    Box::new(|value| match value.parse::<usize>() {
+                        Ok(l) => Ok(l),
+                        _ => Err(format!("Impossible to parse {} to usize", value)),
+                    });
 
                 self.parse_core(params, inner)
             }
@@ -166,10 +183,11 @@ pub mod execution {
 
         impl Parse<String> for Argument<String> {
             fn parse(&mut self, params: &Vec<String>) -> Result<String, String> {
-                let inner: Box<dyn Fn(&String) ->  Result<String, String>> = Box::new(|value|match std::fs::File::create(value) {
-                    Ok(_) => Ok(value.to_owned()),
-                    _ => Err(format!("Impossible to create file {}", value)),
-                });
+                let inner: Box<dyn Fn(&String) -> Result<String, String>> =
+                    Box::new(|value| match std::fs::File::create(value) {
+                        Ok(_) => Ok(value.to_owned()),
+                        _ => Err(format!("Impossible to create file {}", value)),
+                    });
 
                 self.parse_core(params, inner)
             }
@@ -177,10 +195,11 @@ pub mod execution {
 
         impl Parse<u32> for Argument<u32> {
             fn parse(&mut self, params: &Vec<String>) -> Result<u32, String> {
-                let inner: Box<dyn Fn(&String) ->  Result<u32, String>> = Box::new(|value|match value.parse::<u32>() {
-                    Ok(l) => Ok(l),
-                    _ => Err(format!("Impossible to parse {} to u32", value)),
-                });
+                let inner: Box<dyn Fn(&String) -> Result<u32, String>> =
+                    Box::new(|value| match value.parse::<u32>() {
+                        Ok(l) => Ok(l),
+                        _ => Err(format!("Impossible to parse {} to u32", value)),
+                    });
 
                 self.parse_core(params, inner)
             }
@@ -188,14 +207,79 @@ pub mod execution {
 
         impl Parse<char> for Argument<char> {
             fn parse(&mut self, params: &Vec<String>) -> Result<char, String> {
-                let inner: Box<dyn Fn(&String) ->  Result<char, String>> = Box::new(|value|match value.parse::<char>() {
-                    Ok(l) => Ok(l),
-                    _ => Err(format!("Impossible to parse {} to char", value)),
-                });
+                let inner: Box<dyn Fn(&String) -> Result<char, String>> =
+                    Box::new(|value| match value.parse::<char>() {
+                        Ok(l) => Ok(l),
+                        _ => Err(format!("Impossible to parse {} to char", value)),
+                    });
 
                 self.parse_core(params, inner)
             }
         }
 
+        impl Parse<bool> for Argument<bool> {
+            fn parse(&mut self, params: &Vec<String>) -> Result<bool, String> {
+                let inner: Box<dyn Fn(&String) -> Result<bool, String>> =
+                    Box::new(|value| match value.parse::<bool>() {
+                        Ok(l) => Ok(l),
+                        _ => Err(format!("Impossible to parse {} to boolean", value)),
+                    });
+
+                self.parse_core(params, inner)
+            }
+        }
+    }
+
+    #[cfg(test)]
+    mod tests {
+        use super::*;
+
+        #[test]
+        fn given_boolean_argument_is_present_when_parsed_gets_proper_value() {
+            let params = vec![String::from("--arg1"), String::from("true")];
+            let mut argument: Argument<bool> = Argument {
+                keyword: "--arg1",
+                description: "",
+                default: Some(false),
+                value: None,
+            };
+
+            let actual = argument.try_set(&params);
+
+            assert!(actual.is_ok());
+            assert_eq!(actual.unwrap(), true);
+        }
+
+        #[test]
+        fn given_boolean_argument_is_present_with_only_keyword_when_parsed_gets_default_value() {
+            let params = vec![String::from("--arg1")];
+            let mut argument: Argument<bool> = Argument {
+                keyword: "--arg1",
+                description: "",
+                default: Some(false),
+                value: None,
+            };
+
+            let actual = argument.try_set(&params);
+
+            assert!(actual.is_ok());
+            assert_eq!(actual.unwrap(), false);
+        }
+
+        #[test]
+        fn given_boolean_argument_is_not_present_when_parsed_gets_default_value() {
+            let params = vec![];
+            let mut argument: Argument<bool> = Argument {
+                keyword: "--arg1",
+                description: "",
+                default: Some(false),
+                value: None,
+            };
+
+            let actual = argument.try_set(&params);
+
+            assert!(actual.is_ok());
+            assert_eq!(actual.unwrap(), false);
+        }
     }
 }

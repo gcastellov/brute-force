@@ -7,11 +7,16 @@ pub struct Dictionary {
 }
 
 impl Dictionary {
-    pub fn new(word_lenth: usize, start_with: usize, start_with_char: usize, available_chars: &Vec<char>) -> Dictionary {
+    pub fn new(
+        word_lenth: usize,
+        start_with: usize,
+        start_with_char: usize,
+        available_chars: &Vec<char>,
+    ) -> Dictionary {
         Dictionary {
             word_length: word_lenth,
             chars: available_chars.to_owned(),
-            word: (0..start_with+1).map(|_|start_with_char).collect(),
+            word: (0..start_with + 1).map(|_| start_with_char).collect(),
             counter: 0,
             owned: 0,
         }
@@ -68,7 +73,6 @@ mod tests {
         Dictionary::new(word_length, start_with, start_with_char, &available_chars)
     }
 
-
     #[test]
     fn given_default_values_when_new_dictionary_then_gets_instance() {
         let available_chars: Vec<char> = (32..128).filter_map(char::from_u32).collect();
@@ -76,8 +80,9 @@ mod tests {
         let start_with: usize = 0;
         let start_with_char: usize = 0;
 
-        let dictionary = Dictionary::new(word_length, start_with, start_with_char, &available_chars);
-        
+        let dictionary =
+            Dictionary::new(word_length, start_with, start_with_char, &available_chars);
+
         assert_eq!(available_chars, dictionary.chars);
         assert_eq!(word_length, dictionary.word_length);
         assert_eq!(vec![0], dictionary.word);
@@ -118,7 +123,10 @@ mod tests {
         let dictionary = get_instance(word_length, start_with, start_with_char);
 
         assert_eq!(word_length, dictionary.word_length);
-        assert_eq!(vec![start_with_char, start_with_char, start_with_char], dictionary.word);
+        assert_eq!(
+            vec![start_with_char, start_with_char, start_with_char],
+            dictionary.word
+        );
     }
 
     #[test]
@@ -146,7 +154,8 @@ mod tests {
     }
 
     #[test]
-    fn given_start_with_length_and_char_values_when_getting_current_word_then_translates_to_string() {
+    fn given_start_with_length_and_char_values_when_getting_current_word_then_translates_to_string()
+    {
         let word_length: usize = 0;
         let start_with: usize = 2;
         let start_with_char: usize = 1;
