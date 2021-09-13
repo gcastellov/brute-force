@@ -235,7 +235,7 @@ pub mod execution {
         use super::*;
 
         #[test]
-        fn given_boolean_argument_is_present_when_parsed_gets_proper_value() {
+        fn given_boolean_argument_is_present_when_parsed_then_gets_proper_value() {
             let params = vec![String::from("--arg1"), String::from("true")];
             let mut argument: Argument<bool> = Argument {
                 keyword: "--arg1",
@@ -251,7 +251,7 @@ pub mod execution {
         }
 
         #[test]
-        fn given_boolean_argument_is_present_with_only_keyword_when_parsed_gets_default_value() {
+        fn given_boolean_argument_is_present_with_only_keyword_when_parsed_then_gets_default_value() {
             let params = vec![String::from("--arg1")];
             let mut argument: Argument<bool> = Argument {
                 keyword: "--arg1",
@@ -267,7 +267,7 @@ pub mod execution {
         }
 
         #[test]
-        fn given_boolean_argument_is_not_present_when_parsed_gets_default_value() {
+        fn given_boolean_argument_is_not_present_when_parsed_then_gets_default_value() {
             let params = vec![];
             let mut argument: Argument<bool> = Argument {
                 keyword: "--arg1",
@@ -281,5 +281,274 @@ pub mod execution {
             assert!(actual.is_ok());
             assert_eq!(actual.unwrap(), false);
         }
+
+        #[test]
+        fn given_boolean_argument_is_incorrect_with_non_default_value_when_parsed_then_gets_error() {
+            let params = vec![String::from("--arg1"), String::from("123")];
+            let mut argument: Argument<bool> = Argument {
+                keyword: "--arg1",
+                description: "",
+                default: None,
+                value: None,
+            };
+
+            let actual = argument.try_set(&params);
+
+            assert!(actual.is_err());
+        }
+
+        #[test]
+        fn given_boolean_argument_is_incorrect_with_default_value_when_parsed_then_gets_default_value() {
+            let params = vec![String::from("--arg1"), String::from("123")];
+            let mut argument: Argument<bool> = Argument {
+                keyword: "--arg1",
+                description: "",
+                default: Some(true),
+                value: None,
+            };
+
+            let actual = argument.try_set(&params);
+
+            assert!(actual.is_ok());
+            assert_eq!(actual.unwrap(), true);
+        }
+
+        #[test]
+        fn given_u32_argument_is_present_when_parsed_then_gets_proper_value() {
+            let params = vec![String::from("--arg1"), String::from("64")];
+            let mut argument: Argument<u32> = Argument {
+                keyword: "--arg1",
+                description: "",
+                default: None,
+                value: None,
+            };
+
+            let actual = argument.try_set(&params);
+
+            assert!(actual.is_ok());
+            assert_eq!(actual.unwrap(), 64);
+        }
+
+        #[test]
+        fn given_u32_argument_is_present_with_only_keyword_when_parsed_then_gets_default_value() {
+            let params = vec![String::from("--arg1")];
+            let mut argument: Argument<u32> = Argument {
+                keyword: "--arg1",
+                description: "",
+                default: Some(32),
+                value: None,
+            };
+
+            let actual = argument.try_set(&params);
+
+            assert!(actual.is_ok());
+            assert_eq!(actual.unwrap(), 32);
+        }
+
+        #[test]
+        fn given_u32_argument_is_not_present_when_parsed_then_gets_default_value() {
+            let params = vec![];
+            let mut argument: Argument<u32> = Argument {
+                keyword: "--arg1",
+                description: "",
+                default: Some(16),
+                value: None,
+            };
+
+            let actual = argument.try_set(&params);
+
+            assert!(actual.is_ok());
+            assert_eq!(actual.unwrap(), 16);
+        }
+
+        #[test]
+        fn given_u32_argument_is_incorrect_with_non_default_value_when_parsed_then_gets_error() {
+            let params = vec![String::from("--arg1"), String::from("something")];
+            let mut argument: Argument<bool> = Argument {
+                keyword: "--arg1",
+                description: "",
+                default: None,
+                value: None,
+            };
+
+            let actual = argument.try_set(&params);
+
+            assert!(actual.is_err());
+        }
+
+        #[test]
+        fn given_u32_argument_is_incorrect_with_default_value_when_parsed_then_gets_default_value() {
+            let params = vec![String::from("--arg1"), String::from("something")];
+            let mut argument: Argument<u32> = Argument {
+                keyword: "--arg1",
+                description: "",
+                default: Some(8),
+                value: None,
+            };
+
+            let actual = argument.try_set(&params);
+
+            assert!(actual.is_ok());
+            assert_eq!(actual.unwrap(), 8);
+        }
+
+        #[test]
+        fn given_char_argument_is_present_when_parsed_then_gets_proper_value() {
+            let params = vec![String::from("--arg1"), String::from("a")];
+            let mut argument: Argument<char> = Argument {
+                keyword: "--arg1",
+                description: "",
+                default: None,
+                value: None,
+            };
+
+            let actual = argument.try_set(&params);
+
+            assert!(actual.is_ok());
+            assert_eq!(actual.unwrap(), 'a');
+        }
+
+        #[test]
+        fn given_char_argument_is_present_with_only_keyword_when_parsed_then_gets_default_value() {
+            let params = vec![String::from("--arg1")];
+            let mut argument: Argument<char> = Argument {
+                keyword: "--arg1",
+                description: "",
+                default: Some('b'),
+                value: None,
+            };
+
+            let actual = argument.try_set(&params);
+
+            assert!(actual.is_ok());
+            assert_eq!(actual.unwrap(), 'b');
+        }
+
+        #[test]
+        fn given_char_argument_is_not_present_when_parsed_then_gets_default_value() {
+            let params = vec![];
+            let mut argument: Argument<char> = Argument {
+                keyword: "--arg1",
+                description: "",
+                default: Some('c'),
+                value: None,
+            };
+
+            let actual = argument.try_set(&params);
+
+            assert!(actual.is_ok());
+            assert_eq!(actual.unwrap(), 'c');
+        }
+
+        #[test]
+        fn given_char_argument_is_incorrect_with_non_default_value_when_parsed_then_gets_error() {
+            let params = vec![String::from("--arg1"), String::from("something")];
+            let mut argument: Argument<char> = Argument {
+                keyword: "--arg1",
+                description: "",
+                default: None,
+                value: None,
+            };
+
+            let actual = argument.try_set(&params);
+
+            assert!(actual.is_err());
+        }
+
+        #[test]
+        fn given_char_argument_is_incorrect_with_default_value_when_parsed_then_gets_default_value() {
+            let params = vec![String::from("--arg1"), String::from("something")];
+            let mut argument: Argument<char> = Argument {
+                keyword: "--arg1",
+                description: "",
+                default: Some('d'),
+                value: None,
+            };
+
+            let actual = argument.try_set(&params);
+
+            assert!(actual.is_ok());
+            assert_eq!(actual.unwrap(), 'd');
+        }
+
+        #[test]
+        fn given_usize_argument_is_present_when_parsed_then_gets_proper_value() {
+            let params = vec![String::from("--arg1"), String::from("64")];
+            let mut argument: Argument<usize> = Argument {
+                keyword: "--arg1",
+                description: "",
+                default: None,
+                value: None,
+            };
+
+            let actual = argument.try_set(&params);
+
+            assert!(actual.is_ok());
+            assert_eq!(actual.unwrap(), 64);
+        }
+
+        #[test]
+        fn given_usize_argument_is_present_with_only_keyword_when_parsed_then_gets_default_value() {
+            let params = vec![String::from("--arg1")];
+            let mut argument: Argument<usize> = Argument {
+                keyword: "--arg1",
+                description: "",
+                default: Some(32),
+                value: None,
+            };
+
+            let actual = argument.try_set(&params);
+
+            assert!(actual.is_ok());
+            assert_eq!(actual.unwrap(), 32);
+        }
+
+        #[test]
+        fn given_usize_argument_is_not_present_when_parsed_then_gets_default_value() {
+            let params = vec![];
+            let mut argument: Argument<usize> = Argument {
+                keyword: "--arg1",
+                description: "",
+                default: Some(16),
+                value: None,
+            };
+
+            let actual = argument.try_set(&params);
+
+            assert!(actual.is_ok());
+            assert_eq!(actual.unwrap(), 16);
+        }
+
+        #[test]
+        fn given_usize_argument_is_incorrect_with_non_default_value_when_parsed_then_gets_error() {
+            let params = vec![String::from("--arg1"), String::from("something")];
+            let mut argument: Argument<usize> = Argument {
+                keyword: "--arg1",
+                description: "",
+                default: None,
+                value: None,
+            };
+
+            let actual = argument.try_set(&params);
+
+            assert!(actual.is_err());
+        }
+
+        #[test]
+        fn given_usize_argument_is_incorrect_with_default_value_when_parsed_then_gets_default_value() {
+            let params = vec![String::from("--arg1"), String::from("something")];
+            let mut argument: Argument<usize> = Argument {
+                keyword: "--arg1",
+                description: "",
+                default: Some(8),
+                value: None,
+            };
+
+            let actual = argument.try_set(&params);
+
+            assert!(actual.is_ok());
+            assert_eq!(actual.unwrap(), 8);
+        }
+
     }
 }
