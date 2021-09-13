@@ -232,6 +232,7 @@ pub mod execution {
 
     #[cfg(test)]
     mod tests {
+        use spectral::prelude::*;
         use super::*;
 
         #[test]
@@ -246,8 +247,8 @@ pub mod execution {
 
             let actual = argument.try_set(&params);
 
-            assert!(actual.is_ok());
-            assert_eq!(actual.unwrap(), true);
+            assert_that(&actual).is_ok();
+            assert_that(&actual.unwrap()).is_equal_to(true);
         }
 
         #[test]
@@ -262,8 +263,8 @@ pub mod execution {
 
             let actual = argument.try_set(&params);
 
-            assert!(actual.is_ok());
-            assert_eq!(actual.unwrap(), false);
+            assert_that(&actual).is_ok();
+            assert_that(&actual.unwrap()).is_equal_to(false);
         }
 
         #[test]
@@ -278,8 +279,8 @@ pub mod execution {
 
             let actual = argument.try_set(&params);
 
-            assert!(actual.is_ok());
-            assert_eq!(actual.unwrap(), false);
+            assert_that(&actual).is_ok();
+            assert_that(&actual.unwrap()).is_equal_to(false);
         }
 
         #[test]
@@ -294,7 +295,7 @@ pub mod execution {
 
             let actual = argument.try_set(&params);
 
-            assert!(actual.is_err());
+            assert_that(&actual).is_err();
         }
 
         #[test]
@@ -309,8 +310,8 @@ pub mod execution {
 
             let actual = argument.try_set(&params);
 
-            assert!(actual.is_ok());
-            assert_eq!(actual.unwrap(), true);
+            assert_that(&actual).is_ok();
+            assert_that(&actual.unwrap()).is_equal_to(true);
         }
 
         #[test]
@@ -325,8 +326,8 @@ pub mod execution {
 
             let actual = argument.try_set(&params);
 
-            assert!(actual.is_ok());
-            assert_eq!(actual.unwrap(), 64);
+            assert_that(&actual).is_ok();
+            assert_that(&actual.unwrap()).is_equal_to(64);
         }
 
         #[test]
@@ -341,8 +342,8 @@ pub mod execution {
 
             let actual = argument.try_set(&params);
 
-            assert!(actual.is_ok());
-            assert_eq!(actual.unwrap(), 32);
+            assert_that(&actual).is_ok();
+            assert_that(&actual.unwrap()).is_equal_to(32);
         }
 
         #[test]
@@ -357,8 +358,8 @@ pub mod execution {
 
             let actual = argument.try_set(&params);
 
-            assert!(actual.is_ok());
-            assert_eq!(actual.unwrap(), 16);
+            assert_that(&actual).is_ok();
+            assert_that(&actual.unwrap()).is_equal_to(16);
         }
 
         #[test]
@@ -373,7 +374,7 @@ pub mod execution {
 
             let actual = argument.try_set(&params);
 
-            assert!(actual.is_err());
+            assert_that(&actual).is_err();
         }
 
         #[test]
@@ -388,8 +389,8 @@ pub mod execution {
 
             let actual = argument.try_set(&params);
 
-            assert!(actual.is_ok());
-            assert_eq!(actual.unwrap(), 8);
+            assert_that(&actual).is_ok();
+            assert_that(&actual.unwrap()).is_equal_to(8);
         }
 
         #[test]
@@ -404,8 +405,8 @@ pub mod execution {
 
             let actual = argument.try_set(&params);
 
-            assert!(actual.is_ok());
-            assert_eq!(actual.unwrap(), 'a');
+            assert_that(&actual).is_ok();
+            assert_that(&actual.unwrap()).is_equal_to('a');
         }
 
         #[test]
@@ -420,8 +421,8 @@ pub mod execution {
 
             let actual = argument.try_set(&params);
 
-            assert!(actual.is_ok());
-            assert_eq!(actual.unwrap(), 'b');
+            assert_that(&actual).is_ok();
+            assert_that(&actual.unwrap()).is_equal_to('b');
         }
 
         #[test]
@@ -436,8 +437,8 @@ pub mod execution {
 
             let actual = argument.try_set(&params);
 
-            assert!(actual.is_ok());
-            assert_eq!(actual.unwrap(), 'c');
+            assert_that(&actual).is_ok();
+            assert_that(&actual.unwrap()).is_equal_to('c');
         }
 
         #[test]
@@ -452,7 +453,7 @@ pub mod execution {
 
             let actual = argument.try_set(&params);
 
-            assert!(actual.is_err());
+            assert_that(&actual).is_err();
         }
 
         #[test]
@@ -467,8 +468,8 @@ pub mod execution {
 
             let actual = argument.try_set(&params);
 
-            assert!(actual.is_ok());
-            assert_eq!(actual.unwrap(), 'd');
+            assert_that(&actual).is_ok();
+            assert_that(&actual.unwrap()).is_equal_to('d');
         }
 
         #[test]
@@ -483,8 +484,9 @@ pub mod execution {
 
             let actual = argument.try_set(&params);
 
-            assert!(actual.is_ok());
-            assert_eq!(actual.unwrap(), 64);
+
+            assert_that(&actual).is_ok();
+            assert_that(&actual.unwrap()).is_equal_to(64);
         }
 
         #[test]
@@ -499,8 +501,9 @@ pub mod execution {
 
             let actual = argument.try_set(&params);
 
-            assert!(actual.is_ok());
-            assert_eq!(actual.unwrap(), 32);
+
+            assert_that(&actual).is_ok();
+            assert_that(&actual.unwrap()).is_equal_to(32);
         }
 
         #[test]
@@ -515,8 +518,8 @@ pub mod execution {
 
             let actual = argument.try_set(&params);
 
-            assert!(actual.is_ok());
-            assert_eq!(actual.unwrap(), 16);
+            assert_that(&actual).is_ok();
+            assert_that(&actual.unwrap()).is_equal_to(16);
         }
 
         #[test]
@@ -531,7 +534,7 @@ pub mod execution {
 
             let actual = argument.try_set(&params);
 
-            assert!(actual.is_err());
+            assert_that(&actual).is_err();
         }
 
         #[test]
@@ -546,8 +549,50 @@ pub mod execution {
 
             let actual = argument.try_set(&params);
 
-            assert!(actual.is_ok());
-            assert_eq!(actual.unwrap(), 8);
+            assert_that(&actual).is_ok();
+            assert_that(&actual.unwrap()).is_equal_to(8);
+        }
+
+        #[test]
+        fn when_new_then_gets_appcontext_instance() {
+            let actual = AppContext::new();
+                        
+            assert_that(&actual.available_chars).has_length(96);
+            assert_that(&actual.start_with.keyword).is_equal_to("--start-with");
+            assert_that(&actual.start_with_char.keyword).is_equal_to("--start-with-char");
+            assert_that(&actual.file.keyword).is_equal_to("--file");
+            assert_that(&actual.size.keyword).is_equal_to("--size");
+            assert_that(&actual.word_length.keyword).is_equal_to("--length");
+            assert_that(&actual.verbose.keyword).is_equal_to("--verbose");
+        }
+
+        #[test]
+        fn given_app_context_when_from_then_gets_parameters() {
+
+            const WORD_LENGTH: usize = 8;
+            const FILE: &'static str = "/home/brute-force/output";
+            const SIZE: u32 = 10;
+            const START_WITH: usize = 2;
+            const START_WITH_CHAR: char = 'b';
+            const VERBOSE: bool = true;
+
+            let mut app_context = AppContext::new();
+            app_context.word_length.value = Some(WORD_LENGTH);
+            app_context.file.value = Some(FILE.to_string());
+            app_context.size.value = Some(SIZE);
+            app_context.start_with.value = Some(START_WITH);
+            app_context.start_with_char.value = Some(START_WITH_CHAR);
+            app_context.verbose.value = Some(true);
+
+         
+            let actual = AppParameters::from(&app_context);
+            
+            assert_that(&actual.word_length).is_equal_to(WORD_LENGTH);
+            assert_that(&actual.file).is_equal_to(FILE.to_string());
+            assert_that(&actual.size).is_equal_to(SIZE);
+            assert_that(&actual.start_with).is_equal_to(START_WITH);
+            assert_that(&actual.start_with_char).is_equal_to(66);
+            assert_that(&actual.verbose).is_equal_to(VERBOSE);
         }
 
     }

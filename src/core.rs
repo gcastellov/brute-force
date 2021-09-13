@@ -66,6 +66,7 @@ impl Dictionary {
 
 #[cfg(test)]
 mod tests {
+    use spectral::prelude::*;
     use super::Dictionary;
 
     fn get_instance(word_length: usize, start_with: usize, start_with_char: usize) -> Dictionary {
@@ -83,11 +84,11 @@ mod tests {
         let dictionary =
             Dictionary::new(word_length, start_with, start_with_char, &available_chars);
 
-        assert_eq!(available_chars, dictionary.chars);
-        assert_eq!(word_length, dictionary.word_length);
-        assert_eq!(vec![0], dictionary.word);
-        assert_eq!(0, dictionary.counter);
-        assert_eq!(0, dictionary.owned);
+        assert_that(&dictionary.chars).is_equal_to(available_chars);
+        assert_that(&dictionary.word_length).is_equal_to(word_length);
+        assert_that(&dictionary.word).is_equal_to(vec![0]);
+        assert_that(&dictionary.counter).is_equal_to(0);
+        assert_that(&dictionary.owned).is_equal_to(0);
     }
 
     #[test]
@@ -98,8 +99,8 @@ mod tests {
 
         let dictionary = get_instance(word_length, start_with, start_with_char);
 
-        assert_eq!(word_length, dictionary.word_length);
-        assert_eq!(vec![0, 0, 0], dictionary.word);
+        assert_that(&dictionary.word_length).is_equal_to(word_length);
+        assert_that(&dictionary.word).is_equal_to(vec![0, 0, 0]);
     }
 
     #[test]
@@ -110,8 +111,8 @@ mod tests {
 
         let dictionary = get_instance(word_length, start_with, start_with_char);
 
-        assert_eq!(word_length, dictionary.word_length);
-        assert_eq!(vec![start_with_char], dictionary.word);
+        assert_that(&dictionary.word_length).is_equal_to(word_length);
+        assert_that(&dictionary.word).is_equal_to(vec![start_with_char]);
     }
 
     #[test]
@@ -122,11 +123,8 @@ mod tests {
 
         let dictionary = get_instance(word_length, start_with, start_with_char);
 
-        assert_eq!(word_length, dictionary.word_length);
-        assert_eq!(
-            vec![start_with_char, start_with_char, start_with_char],
-            dictionary.word
-        );
+        assert_that(&dictionary.word_length).is_equal_to(word_length);
+        assert_that(&dictionary.word).is_equal_to(vec![start_with_char, start_with_char, start_with_char]);
     }
 
     #[test]
@@ -138,7 +136,7 @@ mod tests {
         let dictionary = get_instance(word_length, start_with, start_with_char);
         let actual = dictionary.get_current_word();
 
-        assert_eq!(actual, String::from(" "));
+        assert_that(&actual).is_equal_to(String::from(" "));
     }
 
     #[test]
@@ -150,7 +148,7 @@ mod tests {
         let dictionary = get_instance(word_length, start_with, start_with_char);
         let actual = dictionary.get_current_word();
 
-        assert_eq!(actual, String::from("!"));
+        assert_that(&actual).is_equal_to(String::from("!"));
     }
 
     #[test]
@@ -163,7 +161,7 @@ mod tests {
         let dictionary = get_instance(word_length, start_with, start_with_char);
         let actual = dictionary.get_current_word();
 
-        assert_eq!(actual, String::from("!!!"));
+        assert_that(&actual).is_equal_to(String::from("!!!"));
     }
 
     #[test]
@@ -175,6 +173,6 @@ mod tests {
         let mut dictionary = get_instance(word_length, start_with, start_with_char);
         dictionary.next_word();
 
-        assert_eq!(vec![start_with_char, start_with_char, 2], dictionary.word);
+        assert_that(&dictionary.word).is_equal_to(vec![start_with_char, start_with_char, 2]);
     }
 }
