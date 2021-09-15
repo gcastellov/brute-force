@@ -12,6 +12,7 @@ pub mod execution {
         available_chars: Vec<char>,
     }
 
+    #[derive(Debug)]
     pub struct AppParameters {
         pub start_with: usize,
         pub start_with_char: usize,
@@ -184,9 +185,9 @@ pub mod execution {
         impl Parse<String> for Argument<String> {
             fn parse(&mut self, params: &Vec<String>) -> Result<String, String> {
                 let inner: Box<dyn Fn(&String) -> Result<String, String>> =
-                    Box::new(|value| match std::fs::File::create(value) {
-                        Ok(_) => Ok(value.to_owned()),
-                        _ => Err(format!("Impossible to create file {}", value)),
+                    Box::new(|value| match value.is_empty() {
+                        false => Ok(value.to_owned()),
+                        _ => Err(format!("Impossible to get '{}' as string", value)),
                     });
 
                 self.parse_core(params, inner)
@@ -232,8 +233,8 @@ pub mod execution {
 
     #[cfg(test)]
     mod tests {
-        use spectral::prelude::*;
         use super::*;
+        use spectral::prelude::*;
 
         #[test]
         fn given_boolean_argument_is_present_when_parsed_then_gets_proper_value() {
@@ -252,7 +253,8 @@ pub mod execution {
         }
 
         #[test]
-        fn given_boolean_argument_is_present_with_only_keyword_when_parsed_then_gets_default_value() {
+        fn given_boolean_argument_is_present_with_only_keyword_when_parsed_then_gets_default_value()
+        {
             let params = vec![String::from("--arg1")];
             let mut argument: Argument<bool> = Argument {
                 keyword: "--arg1",
@@ -284,7 +286,8 @@ pub mod execution {
         }
 
         #[test]
-        fn given_boolean_argument_is_incorrect_with_non_default_value_when_parsed_then_gets_error() {
+        fn given_boolean_argument_is_incorrect_with_non_default_value_when_parsed_then_gets_error()
+        {
             let params = vec![String::from("--arg1"), String::from("123")];
             let mut argument: Argument<bool> = Argument {
                 keyword: "--arg1",
@@ -299,7 +302,8 @@ pub mod execution {
         }
 
         #[test]
-        fn given_boolean_argument_is_incorrect_with_default_value_when_parsed_then_gets_default_value() {
+        fn given_boolean_argument_is_incorrect_with_default_value_when_parsed_then_gets_default_value(
+        ) {
             let params = vec![String::from("--arg1"), String::from("123")];
             let mut argument: Argument<bool> = Argument {
                 keyword: "--arg1",
@@ -378,7 +382,8 @@ pub mod execution {
         }
 
         #[test]
-        fn given_u32_argument_is_incorrect_with_default_value_when_parsed_then_gets_default_value() {
+        fn given_u32_argument_is_incorrect_with_default_value_when_parsed_then_gets_default_value()
+        {
             let params = vec![String::from("--arg1"), String::from("something")];
             let mut argument: Argument<u32> = Argument {
                 keyword: "--arg1",
@@ -457,7 +462,8 @@ pub mod execution {
         }
 
         #[test]
-        fn given_char_argument_is_incorrect_with_default_value_when_parsed_then_gets_default_value() {
+        fn given_char_argument_is_incorrect_with_default_value_when_parsed_then_gets_default_value()
+        {
             let params = vec![String::from("--arg1"), String::from("something")];
             let mut argument: Argument<char> = Argument {
                 keyword: "--arg1",
@@ -484,7 +490,6 @@ pub mod execution {
 
             let actual = argument.try_set(&params);
 
-
             assert_that(&actual).is_ok();
             assert_that(&actual.unwrap()).is_equal_to(64);
         }
@@ -500,7 +505,6 @@ pub mod execution {
             };
 
             let actual = argument.try_set(&params);
-
 
             assert_that(&actual).is_ok();
             assert_that(&actual.unwrap()).is_equal_to(32);
@@ -538,7 +542,8 @@ pub mod execution {
         }
 
         #[test]
-        fn given_usize_argument_is_incorrect_with_default_value_when_parsed_then_gets_default_value() {
+        fn given_usize_argument_is_incorrect_with_default_value_when_parsed_then_gets_default_value(
+        ) {
             let params = vec![String::from("--arg1"), String::from("something")];
             let mut argument: Argument<usize> = Argument {
                 keyword: "--arg1",
@@ -556,7 +561,7 @@ pub mod execution {
         #[test]
         fn when_new_then_gets_appcontext_instance() {
             let actual = AppContext::new();
-                        
+
             assert_that(&actual.available_chars).has_length(96);
             assert_that(&actual.start_with.keyword).is_equal_to("--start-with");
             assert_that(&actual.start_with_char.keyword).is_equal_to("--start-with-char");
@@ -568,7 +573,6 @@ pub mod execution {
 
         #[test]
         fn given_app_context_when_from_then_gets_parameters() {
-
             const WORD_LENGTH: usize = 8;
             const FILE: &'static str = "/home/brute-force/output";
             const SIZE: u32 = 10;
@@ -584,9 +588,8 @@ pub mod execution {
             app_context.start_with_char.value = Some(START_WITH_CHAR);
             app_context.verbose.value = Some(true);
 
-         
             let actual = AppParameters::from(&app_context);
-            
+
             assert_that(&actual.word_length).is_equal_to(WORD_LENGTH);
             assert_that(&actual.file).is_equal_to(FILE.to_string());
             assert_that(&actual.size).is_equal_to(SIZE);
@@ -595,5 +598,39 @@ pub mod execution {
             assert_that(&actual.verbose).is_equal_to(VERBOSE);
         }
 
+        #[test]
+        fn given_all_required_arguments_provided_when_getting_parameters_then_gets_ok() {
+            const LENGTH: usize = 8;
+            const FILE: &str = "/home/brute-force/out";
+            const SIZE: u32 = 10;
+
+            let mut app_context = AppContext::new();
+            let params = vec![
+                String::from("--length"),
+                LENGTH.to_string(),
+                String::from("--file"),
+                FILE.to_string(),
+                String::from("--size"),
+                SIZE.to_string(),
+            ];
+
+            let actual = app_context.get_parameters(&params);
+
+            assert_that(&actual).is_ok();
+            
+            let app_params = actual.unwrap();
+            assert_that(&app_params.word_length).is_equal_to(LENGTH);
+            assert_that(&app_params.file).is_equal_to(FILE.to_string());
+            assert_that(&app_params.size).is_equal_to(SIZE);
+        }
+
+        #[test]
+        fn given_not_all_required_arguments_provided_when_getting_parameters_then_gets_err() {
+            let mut app_context = AppContext::new();
+            let params = vec![];
+            let actual = app_context.get_parameters(&params);
+
+            assert_that(&actual).is_err();
+        }
     }
 }

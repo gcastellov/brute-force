@@ -66,8 +66,8 @@ impl Dictionary {
 
 #[cfg(test)]
 mod tests {
-    use spectral::prelude::*;
     use super::Dictionary;
+    use spectral::prelude::*;
 
     fn get_instance(word_length: usize, start_with: usize, start_with_char: usize) -> Dictionary {
         let available_chars: Vec<char> = (32..128).filter_map(char::from_u32).collect();
@@ -124,7 +124,11 @@ mod tests {
         let dictionary = get_instance(word_length, start_with, start_with_char);
 
         assert_that(&dictionary.word_length).is_equal_to(word_length);
-        assert_that(&dictionary.word).is_equal_to(vec![start_with_char, start_with_char, start_with_char]);
+        assert_that(&dictionary.word).is_equal_to(vec![
+            start_with_char,
+            start_with_char,
+            start_with_char,
+        ]);
     }
 
     #[test]

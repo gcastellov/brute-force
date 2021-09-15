@@ -34,11 +34,18 @@ fn main() {
     let params: Vec<String> = env::args().skip(1).collect();
     let mut app_context = context::execution::AppContext::new();
 
+    if params.is_empty() {
+        app_context.print_help();
+        return;
+    }
+
     match app_context.get_parameters(&params) {
         Ok(params) => execute(&params),
         Err(e) => {
-            println!("{}", e);
-            app_context.print_help();
+            println!("Oops. Something went wrong...");
+            println!("");
+            println!("\t{}", e);
+            println!("");
         }
     };
 }
